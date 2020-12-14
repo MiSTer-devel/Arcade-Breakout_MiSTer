@@ -1,0 +1,17 @@
+<misterromdescription>
+	<name>Breakout [TTL]</name>
+	<setname>breakout</setname>
+	<mratimestamp>202012140058</mratimestamp>
+	<year>1976</year>
+	<manufacturer>Atari</manufacturer>
+	<category>TTL * Ball & Paddle</category>
+	<category>TTL * Ball & Paddle / Breakout</category>
+	<rbf>breakout</rbf>
+	<switches default="00,00">
+		<dip bits="0,3" name="Bonus Credit" ids="None,100,200,300,400,500,600,700,800"/>
+		<dip bits="4" name="Cabinet Type" ids="Upright,Cocktail"/>
+		<dip bits="5" name="Credit per coin" ids="One,Two"/>
+		<dip bits="6" name="Balls served" ids="3,5"/>
+	</switches>
+	<buttons names="Coin,Start1P,Start2P,Serve" default="R,Start,Select,A"/>
+</misterromdescription>

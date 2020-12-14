@@ -176,10 +176,7 @@ localparam CONF_STR = {
   "O46,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
   "O7,Orientation,Vert,Horiz;",
   "-;",
-  "O8B,Bonus Credit,None,100,200,300,400,500,600,700,800;",
-  "OC,Cabinet Type,Upright,Cocktail;",
-  "OD,Credit per coin,One,Two;",
-  "OE,Balls served,3,5;",
+  "DIP;",
   "-;",
   "OFH,Control P1,Digital,X,X-Inv,Y,Y-Inv,Paddle,Paddle-Inv;",
   "OIK,Control P2,Digital,X,X-Inv,Y,Y-Inv,Paddle,Paddle-Inv;",
@@ -224,6 +221,10 @@ wire  [1:0] buttons;
 wire [63:0] status;
 wire [10:0] ps2_key;
 wire [21:0] gamma_bus;
+wire        ioctl_wr;
+wire [26:0] ioctl_addr;
+wire  [7:0] ioctl_dout;
+wire [15:0] ioctl_index;
 wire        forced_scandoubler;
 
 hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
@@ -235,6 +236,11 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 
   .conf_str(CONF_STR),
   .forced_scandoubler,
+
+  .ioctl_wr,
+  .ioctl_addr,
+  .ioctl_dout,
+  .ioctl_index,
 
   .joystick_0,
   .joystick_1,
@@ -248,6 +254,14 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 
   .ps2_key(ps2_key)
 );
+
+// Load DIP-SW
+reg [7:0] dipsw[8];
+always @(posedge clk_sys) begin
+  if (ioctl_wr && (ioctl_index==254) && !ioctl_addr[24:3])
+    dipsw[ioctl_addr[2:0]] <= ioctl_dout;
+end
+wire [7:0] sw = dipsw[0];
 
 /////////////////////////////////////////////////////////////////////////
 //      VIDEO
@@ -518,25 +532,11 @@ wire P2_SERVE_N = ~(btn_P2serve | joystick_1[7]) | ~PLAYER2;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // Switch settings (S1, S2, S3, S4)
-wire [3:0] S1;
-always_comb begin
-  case (status[11:8])
-    4'd0: S1 = 4'b0000; // None
-    4'd1: S1 = 4'b1000; // 100 pts
-    4'd2: S1 = 4'b0100; // 200 pts
-    4'd3: S1 = 4'b1100; // 300 pts
-    4'd4: S1 = 4'b0010; // 400 pts
-    4'd5: S1 = 4'b1010; // 500 pts
-    4'd6: S1 = 4'b0110; // 600 pts
-    4'd7: S1 = 4'b1110; // 700 pts
-    4'd8: S1 = 4'b0001; // 800 pts
-    default: S1 =  4'b0000; // None
-  endcase
-end
-
-wire S2 = status[12];
-wire S3 = status[13];
-wire S4 = status[14];
+// See breakout_top for details
+wire [3:0] S1 = {sw[0], sw[1], sw[2], sw[3]};
+wire       S2 = sw[4];
+wire       S3 = sw[5];
+wire       S4 = sw[6];
 
 // Instansiate Breakout instance
 wire PLAYFIELD, BALL, SCORE, PAD;
