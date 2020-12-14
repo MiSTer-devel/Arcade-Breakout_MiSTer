@@ -1,3 +1,6 @@
+/*
+ * Brick display
+ */
 module brick_display(
   input  logic CLK_DRV, CKBH,
   input  logic _1H, _2H, _4H, _8H, _16H, _32H, _64H, _128H,

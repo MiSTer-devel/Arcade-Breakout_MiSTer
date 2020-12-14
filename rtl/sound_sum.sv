@@ -1,3 +1,6 @@
+/*
+ * Sound sum
+ */
 module sound_sum(
   input  logic CLK_DRV,
   input  logic BRICK_SOUND, VB_HIT_SOUND, P_HIT_SOUND, FREE_GAME_TONE,
