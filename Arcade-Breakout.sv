@@ -226,6 +226,7 @@ wire        ioctl_wr;
 wire [26:0] ioctl_addr;
 wire  [7:0] ioctl_dout;
 wire [15:0] ioctl_index;
+wire        direct_video;
 wire        forced_scandoubler;
 
 hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
@@ -236,7 +237,10 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
   .gamma_bus,
 
   .conf_str(CONF_STR),
+
   .forced_scandoubler,
+  .direct_video,
+  .status_menumask(direct_video),
 
   .ioctl_wr,
   .ioctl_addr,
