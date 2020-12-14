@@ -186,6 +186,7 @@ localparam CONF_STR = {
   //"OO,TEST PADDLE,Off,On;",
   "R0,Reset(Not supported);",
   "J1,Coin,Start1P,Start2P,Serve;",
+  "jn,R,Start,Select,A;",
   "V,v",`BUILD_DATE
 };
 
