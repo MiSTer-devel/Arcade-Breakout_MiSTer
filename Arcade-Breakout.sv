@@ -563,7 +563,7 @@ breakout_top breakout_top(
   .P1_START_BTN_LAMP(), .P2_START_BTN_LAMP(),
   .HCNT, .VCNT,
   .CREDITS(),
-  .TEST_PAD(status[24])
+  .TEST_PAD(1'b0 /*status[24]*/)
 );
 
 assign video = PLAYFIELD | BALL | SCORE | PAD;
