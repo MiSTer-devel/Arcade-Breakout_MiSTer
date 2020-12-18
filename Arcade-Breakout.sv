@@ -184,7 +184,7 @@ localparam CONF_STR = {
   "ON,Paddle Speed,Slow,Fast;",
   "-;",
   //"OO,TEST PADDLE,Off,On;",
-  "R0,Reset(Not supported);",
+  "R0,Reset;",
   "J1,Coin,Start1P,Start2P,Serve;",
   "jn,R,Start,Select,A;",
   "V,v",`BUILD_DATE
@@ -209,7 +209,7 @@ always @(posedge clk_sys) begin
   CLK_SRC <= div[1];
 end
 
-// Reset signal (not supported)
+// Reset signal
 wire reset = RESET | status[0] | buttons[1];
 
 /////////////////////////////////////////////////////////////////////////
@@ -549,6 +549,7 @@ wire PLAYER2;
 
 breakout_top breakout_top(
   .CLK_DRV(clk_sys), .CLK_SRC,
+  .RESET(reset),
   .S1, .S2, .S3, .S4,
   .P1_SERVE_N, .P2_SERVE_N,
   .P1_START_N, .P2_START_N,

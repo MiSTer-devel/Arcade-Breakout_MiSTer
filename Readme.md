@@ -44,7 +44,12 @@
 ### DIP-switch
 + DIP-switch settings applied immediately after a change made unlike CPU-based cores.
 + No need to reset even OSD saying *Reset to apply*.
-+ Rather, it doesn't support resetting.
+
+### Reset
++ Reset from OSD forces Q latch to reset state. This is not an original feature.
++ Transition to reset state is equivalent to the game powering-up, the game ending with no credits left or static discharge shock being applied.
++ Resetting right after the game started before serve button pressed causes illegal state, to be specific, the ball will pass through bricks in attract mode. 
+This will not happen unless static discharge shock applied to the original game circuit at the same timing. And is resolved by pressing serve button. 
 
 ### Remaining coins
 + Breakout has coin accumulator up to 15.

@@ -3,6 +3,7 @@
  */
 module breakout_top(
   input   logic       CLK_DRV, CLK_SRC,
+  input   logic       RESET,
   input   logic [3:0] S1, // BONUS CREDIT SCORE
                           //  0000: No bonus credit
                           //  1000: 100 pts, 0100: 200 pts, 1100: 300 pts, 0010: 400 pts

@@ -2,7 +2,7 @@
  * Game control
  */
 module game_control(
-  input  logic CLK_DRV,
+  input  logic CLK_DRV, RESET,
   input  logic P1_START_N, P2_START_N,
   input  logic COIN1_N, COIN2_N,
   input  logic _1_OR_2_CREDIT_N, _2_CREDIT_N, EGL,
@@ -17,7 +17,9 @@ module game_control(
   // Q Latch
   //
   always_ff @(posedge CLK_DRV) begin
-    if (!COIN1_N || !COIN2_N)
+    if (RESET)
+      Q <= 1'b0; // Reset state 
+    else if (!COIN1_N || !COIN2_N)
       Q <= 1'b1; // Play state
     else if (EGL && _1_OR_2_CREDIT_N)
       Q <= 1'b0; // Reset state
