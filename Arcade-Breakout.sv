@@ -178,8 +178,10 @@ localparam CONF_STR = {
   "-;",
   "DIP;",
   "-;",
-  "OFH,Control P1,Digital,X,X-Inv,Y,Y-Inv,Paddle,Paddle-Inv;",
-  "OIK,Control P2,Digital,X,X-Inv,Y,Y-Inv,Paddle,Paddle-Inv;",
+  "OFH,Control P1,Digital,X,Y,Paddle;",
+  "O8,Control P1 Invert,No,Yes;",
+  "OIK,Control P2,Digital,X,Y,Paddle;",
+  "O9,Control P2 Invert,No,Yes;",
   "-;",
   "ON,Paddle Speed,Slow,Fast;",
   "-;",
@@ -492,31 +494,27 @@ end
 //
 // Mix Inputs
 //
-wire [2:0] p1cntl = status[17:15];
-wire [2:0] p2cntl = status[20:18];
+wire [3:0] p1cntl   = status[17:15];
+wire [3:0] p2cntl   = status[20:18];
+wire       p1invert = status[8];
+wire       p2invert = status[9];
 
 wire [7:0] p1pos;
 wire [7:0] p2pos;
 
 always_comb begin
   case (p1cntl)
-    3'd0:    p1pos = pos_d[7:0];    // Digital
-    3'd1:    p1pos = ~p1pos_ax;     // X
-    3'd2:    p1pos = p1pos_ax;      // X-Inv
-    3'd3:    p1pos = ~p1pos_ay;     // Y
-    3'd4:    p1pos = p1pos_ay;      // Y-Inv
-    3'd5:    p1pos = ~paddle_0;     // Paddle
-    3'd6:    p1pos = paddle_0;      // Paddle-Inv
+    3'd0:    p1pos = pos_d[7:0];                        // Digital
+    3'd1:    p1pos = p1invert ? p1pos_ax : ~p1pos_ax;   // X / X-Inv
+    3'd2:    p1pos = p1invert ? p1pos_ay : ~p1pos_ay;   // Y / Y-Inv
+    3'd3:    p1pos = p1invert ? paddle_0 : ~paddle_0;   // Paddle / Paddle-Inv
     default: p1pos = 8'd114;
   endcase
   case (p2cntl)
-    3'd0:    p2pos = pos_d[7:0];    // Digital
-    3'd1:    p2pos = ~p2pos_ax;     // X
-    3'd2:    p2pos = p2pos_ax;      // X-Inv
-    3'd3:    p2pos = ~p2pos_ay;     // Y
-    3'd4:    p2pos = p2pos_ay;      // Y-Inv
-    3'd5:    p2pos = ~paddle_1;     // Paddle
-    3'd6:    p2pos = paddle_1;      // Paddle-Inv
+    3'd0:    p2pos = pos_d[7:0];                        // Digital
+    3'd1:    p2pos = p2invert ? p2pos_ax : ~p2pos_ax;   // X / X-Inv
+    3'd2:    p2pos = p2invert ? p2pos_ay : ~p2pos_ay;   // Y / Y-Inv
+    3'd3:    p2pos = p2invert ? paddle_1 : ~paddle_1;   // Paddle / Paddle-Inv
     default: p2pos = 8'd114;
   endcase
 end
