@@ -178,12 +178,13 @@ localparam CONF_STR = {
   "-;",
   "DIP;",
   "-;",
-  "OFH,Control P1,Digital,X,Y,Paddle;",
+  "OFH,Control P1,Digital,X,Y,Paddle,Spinner;",
   "O8,Control P1 Invert,No,Yes;",
-  "OIK,Control P2,Digital,X,Y,Paddle;",
+  "OIK,Control P2,Digital,X,Y,Paddle,Spinner;",
   "O9,Control P2 Invert,No,Yes;",
   "-;",
-  "ON,Paddle Speed,Slow,Fast;",
+  "ON,Digital Paddle Speed,Slow,Fast;",
+  "OPQ,Spinner Paddle Speed,Slow,Medium,Fast;",
   "-;",
   //"OO,TEST PADDLE,Off,On;",
   "R0,Reset;",
@@ -220,6 +221,7 @@ wire reset = RESET | status[0] | buttons[1];
 wire [31:0] joystick_0, joystick_1;
 wire [15:0] joystick_analog_0, joystick_analog_1;
 wire  [7:0] paddle_0, paddle_1;
+wire  [8:0] spinner_0, spinner_1;
 wire  [1:0] buttons;
 wire [63:0] status;
 wire [10:0] ps2_key;
@@ -255,6 +257,8 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
   .joystick_analog_1,
   .paddle_0,
   .paddle_1,
+  .spinner_0,
+  .spinner_1,
 
   .buttons,
   .status,
@@ -436,12 +440,15 @@ end
 /////////////////////////////////////////////////////////////////////////
 //      CONTROL
 /////////////////////////////////////////////////////////////////////////
+wire       p1invert = status[8];
+wire       p2invert = status[9];
+wire       dspeed   = status[23];
+wire [1:0] sspeed   = status[26:25];
 
 //
 // Paddle positioning for digital input
 //
-wire       speed = status[23];
-wire [3:0] delta = speed ? 4'd8 : 4'd4;
+wire [3:0] delta = dspeed ? 4'd8 : 4'd4;
 
 reg  [8:0] pos_d = 8'd114;
 
@@ -474,6 +481,45 @@ wire [7:0] p2pos_ax = {~p2joy_sx[7], p2joy_sx[6:0]};
 wire [7:0] p2pos_ay = {~p2joy_sy[7], p2joy_sy[6:0]};
 
 //
+// Paddle positioning for spinner input
+//
+reg old_sp1r, old_sp2r;
+always_ff @(posedge clk_sys) begin
+  old_sp1r <= spinner_0[8];
+  old_sp2r <= spinner_1[8];
+end
+wire sp1_upd = old_sp1r ^ spinner_0[8];
+wire sp2_upd = old_sp2r ^ spinner_1[8];
+
+wire sp1_cw  = sp1_upd & (~spinner_0[7] ^ p1invert) & ~PLAYER2;
+wire sp1_ccw = sp1_upd & ( spinner_0[7] ^ p1invert) & ~PLAYER2;
+wire sp2_cw  = sp2_upd & (~spinner_1[7] ^ p2invert) &  PLAYER2;
+wire sp2_ccw = sp2_upd & ( spinner_1[7] ^ p2invert) &  PLAYER2;
+
+wire [6:0] sp1_uval = spinner_0[7] ? (~spinner_0[6:0] + 6'b1) : spinner_0[6:0];
+wire [6:0] sp2_uval = spinner_1[7] ? (~spinner_1[6:0] + 6'b1) : spinner_1[6:0];
+wire [6:0] sp_uval  = PLAYER2 ? sp2_uval : sp1_uval;
+wire [7:0] sp_uvals;
+always_comb begin
+  case (sspeed)
+    2'd0: sp_uvals = sp_uval << 1;
+    2'd1: sp_uvals = sp_uval << 2;
+    2'd2: sp_uvals = sp_uval << 3;
+    default: sp_uvals = sp_uval;
+  endcase
+end
+
+wire cw  = sp1_cw  | sp2_cw;
+wire ccw = sp1_ccw | sp2_ccw;
+
+reg  [8:0] pos_sp = 8'd128;
+
+always_ff @(posedge clk_sys) begin
+  if (cw)  pos_sp <= ((pos_sp - sp_uvals) > 255) ? 9'd0   : (pos_sp - sp_uvals);
+  if (ccw) pos_sp <= ((pos_sp + sp_uvals) > 255) ? 9'd255 : (pos_sp + sp_uvals);
+end
+
+//
 // Count horizontol line for positioning pad
 //
 wire PAD_EN_N;
@@ -496,25 +542,25 @@ end
 //
 wire [3:0] p1cntl   = status[17:15];
 wire [3:0] p2cntl   = status[20:18];
-wire       p1invert = status[8];
-wire       p2invert = status[9];
 
 wire [7:0] p1pos;
 wire [7:0] p2pos;
 
 always_comb begin
   case (p1cntl)
-    3'd0:    p1pos = pos_d[7:0];                        // Digital
-    3'd1:    p1pos = p1invert ? p1pos_ax : ~p1pos_ax;   // X / X-Inv
-    3'd2:    p1pos = p1invert ? p1pos_ay : ~p1pos_ay;   // Y / Y-Inv
-    3'd3:    p1pos = p1invert ? paddle_0 : ~paddle_0;   // Paddle / Paddle-Inv
+    3'd0:    p1pos = pos_d[7:0];                      // Digital
+    3'd1:    p1pos = p1invert ? p1pos_ax : ~p1pos_ax; // X / X-Inv
+    3'd2:    p1pos = p1invert ? p1pos_ay : ~p1pos_ay; // Y / Y-Inv
+    3'd3:    p1pos = p1invert ? paddle_0 : ~paddle_0; // Paddle / Paddle-Inv
+    3'd4:    p1pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
     default: p1pos = 8'd114;
   endcase
   case (p2cntl)
-    3'd0:    p2pos = pos_d[7:0];                        // Digital
-    3'd1:    p2pos = p2invert ? p2pos_ax : ~p2pos_ax;   // X / X-Inv
-    3'd2:    p2pos = p2invert ? p2pos_ay : ~p2pos_ay;   // Y / Y-Inv
-    3'd3:    p2pos = p2invert ? paddle_1 : ~paddle_1;   // Paddle / Paddle-Inv
+    3'd0:    p2pos = pos_d[7:0];                      // Digital
+    3'd1:    p2pos = p2invert ? p2pos_ax : ~p2pos_ax; // X / X-Inv
+    3'd2:    p2pos = p2invert ? p2pos_ay : ~p2pos_ay; // Y / Y-Inv
+    3'd3:    p2pos = p2invert ? paddle_1 : ~paddle_1; // Paddle / Paddle-Inv
+    3'd4:    p2pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
     default: p2pos = 8'd114;
   endcase
 end
