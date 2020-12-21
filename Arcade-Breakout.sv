@@ -450,7 +450,7 @@ wire [1:0] sspeed   = status[26:25];
 //
 wire [3:0] delta = dspeed ? 4'd8 : 4'd4;
 
-reg  [8:0] pos_d = 8'd114;
+reg  [8:0] pos_d = 8'd128;
 
 wire p1right = (btn_P1right | joystick_0[0]) & ~PLAYER2;
 wire p1left  = (btn_P1left  | joystick_0[1]) & ~PLAYER2;
@@ -553,7 +553,7 @@ always_comb begin
     3'd2:    p1pos = p1invert ? p1pos_ay : ~p1pos_ay; // Y / Y-Inv
     3'd3:    p1pos = p1invert ? paddle_0 : ~paddle_0; // Paddle / Paddle-Inv
     3'd4:    p1pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
-    default: p1pos = 8'd114;
+    default: p1pos = 8'd128;
   endcase
   case (p2cntl)
     3'd0:    p2pos = pos_d[7:0];                      // Digital
@@ -561,7 +561,7 @@ always_comb begin
     3'd2:    p2pos = p2invert ? p2pos_ay : ~p2pos_ay; // Y / Y-Inv
     3'd3:    p2pos = p2invert ? paddle_1 : ~paddle_1; // Paddle / Paddle-Inv
     3'd4:    p2pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
-    default: p2pos = 8'd114;
+    default: p2pos = 8'd128;
   endcase
 end
 
