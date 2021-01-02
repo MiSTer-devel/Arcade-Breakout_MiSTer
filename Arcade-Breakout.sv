@@ -189,7 +189,7 @@ localparam CONF_STR = {
   //"OO,TEST PADDLE,Off,On;",
   "R0,Reset;",
   "J1,Coin,Start1P,Start2P,Serve;",
-  "jn,R,Start,Select,A;",
+  "jn,R,Start,Select,A|P;",
   "V,v",`BUILD_DATE
 };
 
@@ -336,7 +336,7 @@ wire [7:0] VCNT;
 
 // Blanking signals are not supplied from breatkout instance,
 // so defining here
-wire hblank = (HCNT >= 8'd230) || (HCNT <= 8'd18);
+wire hblank = (HCNT >= 8'd224) || (HCNT <= 8'd24);
 // When scandoubler enabled, widen VBlank to prevent flickering.
 // However, this removes 1px from each side of the wall.
 wire vblank_raw = (VCNT >= 8'd228) && (VCNT <= 8'd251);
