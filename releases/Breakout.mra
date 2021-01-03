@@ -14,5 +14,5 @@
 		<dip bits="5" name="Credit per coin" ids="One,Two"/>
 		<dip bits="6" name="Balls served" ids="3,5"/>
 	</switches>
-	<buttons names="Coin,Start1P,Start2P,Serve" default="R,Start,Select,A"/>
+	<buttons names="Coin,Start1P,Start2P,Serve" default="R,Start,Select,A|P"/>
 </misterromdescription>
