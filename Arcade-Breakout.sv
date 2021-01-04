@@ -336,7 +336,9 @@ wire [7:0] VCNT;
 
 // Blanking signals are not supplied from breatkout instance,
 // so defining here
-wire hblank = (HCNT >= 8'd224) || (HCNT <= 8'd24);
+wire hblank_p1 = (HCNT >= 8'd224) || (HCNT <= 8'd24);
+wire hblank_p2 = (HCNT >= 8'd232) || (HCNT <= 8'd32);
+wire hblank = (S2 & PLAYER2) ? hblank_p2 : hblank_p1;
 // When scandoubler enabled, widen VBlank to prevent flickering.
 // However, this removes 1px from each side of the wall.
 wire vblank_raw = (VCNT >= 8'd228) && (VCNT <= 8'd251);
