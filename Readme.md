@@ -21,7 +21,7 @@
    Start 2P      : Select
    Serve         : A
 ```
-+ Joystick, Paddle supported
++ Joystick, Paddle and Spinner supported
 
 ## ROMs
 + No ROMs needed.
