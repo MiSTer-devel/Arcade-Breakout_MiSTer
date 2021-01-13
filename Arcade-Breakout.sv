@@ -241,7 +241,6 @@ wire  [7:0] paddle_0, paddle_1;
 wire  [8:0] spinner_0, spinner_1;
 wire  [1:0] buttons;
 wire [63:0] status;
-wire [10:0] ps2_key;
 wire [21:0] gamma_bus;
 wire        ioctl_wr;
 wire [26:0] ioctl_addr;
@@ -278,9 +277,7 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
   .spinner_1,
 
   .buttons,
-  .status,
-
-  .ps2_key(ps2_key)
+  .status
 );
 
 // Load DIP-SW
@@ -414,49 +411,6 @@ assign AUDIO_S = 0;
 assign AUDIO_MIX = 'd3;
 
 /////////////////////////////////////////////////////////////////////////
-//      KEYBOARD
-/////////////////////////////////////////////////////////////////////////
-wire [7:0]  key_scancode = ps2_key[7:0];
-wire        key_pressed  = ps2_key[9];
-wire        key_state    = ps2_key[10];
-
-reg  key_state_old;
-wire key_state_changed = key_state ^ key_state_old;
-
-reg  btn_P1coin  = 1'b0;
-reg  btn_P2coin  = 1'b0;
-reg  btn_P1start = 1'b0;
-reg  btn_P2start = 1'b0;
-reg  btn_P1serve = 1'b0;
-reg  btn_P2serve = 1'b0;
-reg  btn_P1left  = 1'b0;
-reg  btn_P1right = 1'b0;
-reg  btn_P2left  = 1'b0;
-reg  btn_P2right = 1'b0;
-
-always_ff @(posedge clk_sys) begin
-  key_state_old <= key_state;
-
-  if (key_state_changed) begin
-    case (key_scancode)
-      'h2E: btn_P1coin  <= key_pressed; // 5
-      'h36: btn_P2coin  <= key_pressed; // 6
-      'h16: btn_P1start <= key_pressed; // 1
-      'h1E: btn_P2start <= key_pressed; // 2
-      'h05: btn_P1start <= key_pressed; // F1
-      'h06: btn_P2start <= key_pressed; // F2
-      'h14: btn_P1serve <= key_pressed; // LCtrl
-      'h34: btn_P2serve <= key_pressed; // G
-      'h6B: btn_P1left  <= key_pressed; // left arrow
-      'h74: btn_P1right <= key_pressed; // right arrow
-      'h1C: btn_P2left  <= key_pressed; // A
-      'h23: btn_P2right <= key_pressed; // D
-      default: ;
-    endcase
-  end
-end
-
-/////////////////////////////////////////////////////////////////////////
 //      CONTROL
 /////////////////////////////////////////////////////////////////////////
 wire       p1invert = status[8];
@@ -471,10 +425,10 @@ wire [3:0] delta = dspeed ? 4'd8 : 4'd4;
 
 reg  [8:0] pos_d = 8'd128;
 
-wire p1right = (btn_P1right | joystick_0[0]) & ~PLAYER2;
-wire p1left  = (btn_P1left  | joystick_0[1]) & ~PLAYER2;
-wire p2right = (btn_P2right | joystick_1[0]) & PLAYER2;
-wire p2left  = (btn_P2left  | joystick_1[1]) & PLAYER2;
+wire p1right = joystick_0[0] & ~PLAYER2;
+wire p1left  = joystick_0[1] & ~PLAYER2;
+wire p2right = joystick_1[0] & PLAYER2;
+wire p2left  = joystick_1[1] & PLAYER2;
 
 wire right = p1right | p2right;
 wire left  = p1left  | p2left;
@@ -588,12 +542,12 @@ wire pad1_out = p1cnt < p1pos;
 wire pad2_out = p2cnt < p2pos;
 wire PAD_OUT  = PLAYER2 ? pad2_out : pad1_out;
 
-wire CSW1 = btn_P1coin | joystick_0[4];
-wire CSW2 = btn_P2coin | joystick_1[4];
-wire P1_START_N = ~(btn_P1start | joystick_0[5] | joystick_1[5]);
-wire P2_START_N = ~(btn_P2start | joystick_0[6] | joystick_1[6]);
-wire P1_SERVE_N = ~(btn_P1serve | joystick_0[7]) | PLAYER2;
-wire P2_SERVE_N = ~(btn_P2serve | joystick_1[7]) | ~PLAYER2;
+wire CSW1 = joystick_0[4];
+wire CSW2 = joystick_1[4];
+wire P1_START_N = ~(joystick_0[5] | joystick_1[5]);
+wire P2_START_N = ~(joystick_0[6] | joystick_1[6]);
+wire P1_SERVE_N = ~(joystick_0[7]) | PLAYER2;
+wire P2_SERVE_N = ~(joystick_1[7]) | ~PLAYER2;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //      BREAKOUT INSTANCE
