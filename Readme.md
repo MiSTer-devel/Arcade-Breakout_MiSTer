@@ -1,6 +1,7 @@
 # Arcade Breakout for MiSTer
 
-+ FPGA implementation of arcade Atari Breakout(1976) for MiSTer.
++ FPGA implementation of Arcade _Breakout_(Atari, 1976) for MiSTer.
++ Based on Rev.F schematics.
 
 ## Inputs
 + Joypad (Default)
