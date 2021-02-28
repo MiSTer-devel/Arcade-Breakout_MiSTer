@@ -27,9 +27,9 @@ module astable_555(
 
   always_ff @(posedge CLK) begin
     if (state == HIGH_COUNT)
-      high_counter <= high_counter + 'd1;
+      high_counter <= high_counter + 1'd1;
     else if (state == LOW_COUNT)
-      low_counter  <= low_counter  + 'd1;
+      low_counter  <= low_counter  + 1'd1;
     else if (state == RESET) begin
       high_counter <= 'd0;
       low_counter  <= 'd0;

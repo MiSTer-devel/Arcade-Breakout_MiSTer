@@ -177,14 +177,18 @@ assign ADC_BUS  = 'Z;
 assign USER_OUT = '1;
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
-assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
+//assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
 //assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = '0;
 
 assign LED_DISK = 0;
 assign LED_POWER = 0;
+assign LED_USER = 0;
 assign BUTTONS = 0;
 
 assign {FB_PAL_CLK, FB_FORCE_BLANK, FB_PAL_ADDR, FB_PAL_DOUT, FB_PAL_WR} = '0;
+
+assign VGA_F1 = 0;
+assign VGA_SCALER = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //    CONF STR
@@ -345,7 +349,7 @@ reg ce_pix;
 always_ff @(posedge clk_sys) begin
   reg [2:0] div;
   ce_pix <= !div;
-  div <= div + 'd1;
+  div <= div + 1'd1;
 end
 
 // Horizontal/Vertical conter values in breakout instance
@@ -509,8 +513,8 @@ always_ff @(posedge clk_sys) begin
     p1cnt <= 8'd0;
     p2cnt <= 8'd0;
   end else if (hsync_posedge) begin
-    p1cnt <= p1cnt + 'd1;
-    p2cnt <= p2cnt + 'd1;
+    p1cnt <= p1cnt + 1'd1;
+    p2cnt <= p2cnt + 1'd1;
   end
 end
 

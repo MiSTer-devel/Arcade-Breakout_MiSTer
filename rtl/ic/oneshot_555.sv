@@ -35,9 +35,9 @@ module oneshot_555(
 
   always_ff @(posedge CLK) begin
     if (state == IDLE | state == END)
-      counter <= '0;
+      counter <= 0;
     else if (state == COUNT)
-      counter <= counter + 'd1;
+      counter <= counter + 1'd1;
   end
 
   assign count_end = (counter == COUNTS - 1);
