@@ -201,7 +201,7 @@ assign VGA_SCALER = 0;
 localparam CONF_STR = {
   "A.BREAKOUT;;",
   "-;",
-  "O23,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
+  "H0O23,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
   "O46,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
   "O7,Orientation,Vert,Horiz;",
   "-;",
