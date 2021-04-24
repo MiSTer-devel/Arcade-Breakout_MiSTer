@@ -5,8 +5,7 @@
 	<mratimestamp>202101051534</mratimestamp>
 	<year>1976</year>
 	<manufacturer>Atari</manufacturer>
-	<category>TTL * Ball and Paddle</category>
-	<category>TTL * Ball and Paddle / Breakout</category>
+	<category>Ball and Paddle</category>
 	<rbf>breakout</rbf>
 	<switches default="00,00">
 		<dip bits="0,3" name="Bonus Credit" ids="None,100,200,300,400,500,600,700,800"/>
