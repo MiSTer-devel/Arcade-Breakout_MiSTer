@@ -204,6 +204,7 @@ localparam CONF_STR = {
   "H0O23,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
   "O46,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
   "O7,Orientation,Vert,Horiz;",
+  "OR,VSYNC,TV Compatible,Original;",
   "-;",
   "DIP;",
   "-;",
@@ -371,8 +372,12 @@ wire vblank_raw = (VCNT >= 8'd228) && (VCNT <= 8'd251);
 wire vblank_fx  = (VCNT >= 8'd223) && (VCNT <= 8'd252);
 wire vblank = scandoubler ? vblank_fx : vblank_raw;
 
-// Sync signals are coming from breakout instance, using as-is
-wire HSYNC, VSYNC;
+// HSYNC is coming from breakout instance, using as-is
+wire HSYNC;
+// VSYNC is coming from breakout instance, but it is far from NTSC standard
+// Here, defining optional TV compatible vsync for analog video output
+wire VSYNC;
+wire vsync_opt = (VCNT >= 8'd232) && (VCNT <= 8'd234);
 
 // Sync edge signal for detecting line/frame in handling control
 reg  hsync_old, vsync_old;
@@ -399,7 +404,7 @@ arcade_video #(.WIDTH(512), .DW(12)) arcade_video
   .HBlank(hblank),
   .VBlank(vblank),
   .HSync(HSYNC),
-  .VSync(VSYNC),
+  .VSync(status[27] ? VSYNC : vsync_opt),
 
   .fx,
   .forced_scandoubler,
