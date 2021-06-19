@@ -25,12 +25,14 @@
    /_Arcade/cores/<game rbf>.rbf
 ```
 
-## Important notice
-+ **The video signal is far from standard.**
-+ It is adjusted for stable image output over HDMI.
-+ VGA (on IO board) and DirectVideo are **not guaranteed**.
-
 ## Note
+### VSYNC
++ The original VSYNC is extremely too long compared to NTSC standard and it is overlaped on active video line.
++ This can cause sync problem for some consumer CRTs when you use analog video output.
++ In this core, better VSYNC is regenerated at the final output in order to avoid it.
++ If you prefer the original VSYNC, you can change it from OSD setting.
+
+
 ### DIP-switch
 + DIP-switch settings applied immediately after a change made unlike CPU-based cores.
 + No need to reset even OSD saying *Reset to apply*.
