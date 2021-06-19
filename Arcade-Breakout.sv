@@ -203,7 +203,7 @@ localparam CONF_STR = {
   "-;",
   "H0O23,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
   "O46,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
-  "O7,Orientation,Vert,Horiz;",
+  "H0O7,Orientation,Vert,Horiz;",
   "OR,VSYNC,TV Compatible,Original;",
   "-;",
   "DIP;",
