@@ -205,6 +205,7 @@ localparam CONF_STR = {
   "H0O23,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
   "O46,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
   "H0O7,Orientation,Vert,Horiz;",
+  "OA,Flip Screen,Off,On;",
   "OR,VSYNC,TV Compatible,Original;",
   "-;",
   "DIP;",
@@ -312,24 +313,25 @@ assign VIDEO_ARY = (!ar) ? (status[7] ? 8'd3 : 8'd4) : 12'd0;
 
 // Monochrome video signal
 wire video;
+wire [7:0] HCNT_OL = flip_screen ? ~HCNT : HCNT;
 
 // Color overlay
-wire red_row_p1    = HCNT >= 8'd64 && HCNT <= 8'd71;
-wire amber_row_p1  = HCNT >= 8'd72 && HCNT <= 8'd79;
-wire green_row_p1  = HCNT >= 8'd80 && HCNT <= 8'd87;
-wire yellow_row_p1 = HCNT >= 8'd88 && HCNT <= 8'd95;
+wire red_row_p1    = HCNT_OL >= 8'd64  && HCNT_OL <= 8'd71;
+wire amber_row_p1  = HCNT_OL >= 8'd72  && HCNT_OL <= 8'd79;
+wire green_row_p1  = HCNT_OL >= 8'd80  && HCNT_OL <= 8'd87;
+wire yellow_row_p1 = HCNT_OL >= 8'd88  && HCNT_OL <= 8'd95;
 
-wire red_row_p2    = HCNT >= 8'd184 && HCNT <= 8'd191;
-wire amber_row_p2  = HCNT >= 8'd176 && HCNT <= 8'd183;
-wire green_row_p2  = HCNT >= 8'd168 && HCNT <= 8'd175;
-wire yellow_row_p2 = HCNT >= 8'd160 && HCNT <= 8'd167;
+wire red_row_p2    = HCNT_OL >= 8'd184 && HCNT_OL <= 8'd191;
+wire amber_row_p2  = HCNT_OL >= 8'd176 && HCNT_OL <= 8'd183;
+wire green_row_p2  = HCNT_OL >= 8'd168 && HCNT_OL <= 8'd175;
+wire yellow_row_p2 = HCNT_OL >= 8'd160 && HCNT_OL <= 8'd167;
 
 wire red_row    = red_row_p1    || (S2 & red_row_p2);
 wire amber_row  = amber_row_p1  || (S2 & amber_row_p2);
 wire green_row  = green_row_p1  || (S2 & green_row_p2);
 wire yellow_row = yellow_row_p1 || (S2 & yellow_row_p2);
 
-wire blue_row =  HCNT >= 8'd211 && HCNT <= 8'd219 && !S2;
+wire blue_row = HCNT_OL >= 8'd211 && HCNT_OL <= 8'd219 && !S2;
 
 wire [11:0] rgb;
 always_comb begin
@@ -393,7 +395,8 @@ end
 wire [2:0] fx = status[6:4];
 wire scandoubler = fx || forced_scandoubler;
 
-wire flip = 0;
+wire flip_screen = status[10];
+wire flip = 1'b0;
 wire video_rotated;
 
 arcade_video #(.WIDTH(512), .DW(12)) arcade_video
@@ -435,6 +438,8 @@ assign AUDIO_MIX = 'd3;
 /////////////////////////////////////////////////////////////////////////
 wire       p1invert = status[8];
 wire       p2invert = status[9];
+wire       p1invert_eff = p1invert ^ flip_screen;
+wire       p2invert_eff = p2invert ^ flip_screen;
 wire       dspeed   = status[23];
 wire [1:0] sspeed   = status[26:25];
 
@@ -450,8 +455,10 @@ wire p1left  = joystick_0[1] & ~PLAYER2;
 wire p2right = joystick_1[0] & PLAYER2;
 wire p2left  = joystick_1[1] & PLAYER2;
 
-wire right = p1right | p2right;
-wire left  = p1left  | p2left;
+wire right_raw = p1right | p2right;
+wire left_raw  = p1left  | p2left;
+wire right = flip_screen ? left_raw  : right_raw;
+wire left  = flip_screen ? right_raw : left_raw;
 
 always_ff @(posedge clk_sys) begin
   if (vsync_posedge) begin
@@ -484,15 +491,15 @@ end
 wire sp1_upd = old_sp1r ^ spinner_0[8];
 wire sp2_upd = old_sp2r ^ spinner_1[8];
 
-wire sp1_cw  = sp1_upd & (~spinner_0[7] ^ p1invert) & ~PLAYER2;
-wire sp1_ccw = sp1_upd & ( spinner_0[7] ^ p1invert) & ~PLAYER2;
-wire sp2_cw  = sp2_upd & (~spinner_1[7] ^ p2invert) &  PLAYER2;
-wire sp2_ccw = sp2_upd & ( spinner_1[7] ^ p2invert) &  PLAYER2;
+wire sp1_cw  = sp1_upd & (~spinner_0[7] ^ p1invert_eff) & ~PLAYER2;
+wire sp1_ccw = sp1_upd & ( spinner_0[7] ^ p1invert_eff) & ~PLAYER2;
+wire sp2_cw  = sp2_upd & (~spinner_1[7] ^ p2invert_eff) &  PLAYER2;
+wire sp2_ccw = sp2_upd & ( spinner_1[7] ^ p2invert_eff) &  PLAYER2;
 
 wire [6:0] sp1_uval = spinner_0[7] ? (~spinner_0[6:0] + 6'b1) : spinner_0[6:0];
 wire [6:0] sp2_uval = spinner_1[7] ? (~spinner_1[6:0] + 6'b1) : spinner_1[6:0];
 wire [6:0] sp_uval  = PLAYER2 ? sp2_uval : sp1_uval;
-wire [7:0] sp_uvals;
+logic [7:0] sp_uvals;
 always_comb begin
   case (sspeed)
     2'd0: sp_uvals = sp_uval << 1;
@@ -536,24 +543,24 @@ end
 wire [3:0] p1cntl   = status[17:15];
 wire [3:0] p2cntl   = status[20:18];
 
-wire [7:0] p1pos;
-wire [7:0] p2pos;
+logic [7:0] p1pos;
+logic [7:0] p2pos;
 
 always_comb begin
   case (p1cntl)
-    3'd0:    p1pos = pos_d[7:0];                      // Digital
-    3'd1:    p1pos = p1invert ? p1pos_ax : ~p1pos_ax; // X / X-Inv
-    3'd2:    p1pos = p1invert ? p1pos_ay : ~p1pos_ay; // Y / Y-Inv
-    3'd3:    p1pos = p1invert ? paddle_0 : ~paddle_0; // Paddle / Paddle-Inv
-    3'd4:    p1pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
+    3'd0:    p1pos = pos_d[7:0];                           // Digital
+    3'd1:    p1pos = p1invert_eff ? p1pos_ax : ~p1pos_ax; // X / X-Inv
+    3'd2:    p1pos = p1invert_eff ? p1pos_ay : ~p1pos_ay; // Y / Y-Inv
+    3'd3:    p1pos = p1invert_eff ? paddle_0 : ~paddle_0; // Paddle / Paddle-Inv
+    3'd4:    p1pos = pos_sp[7:0];                          // Spinner / Spinner-Inv
     default: p1pos = 8'd128;
   endcase
   case (p2cntl)
-    3'd0:    p2pos = pos_d[7:0];                      // Digital
-    3'd1:    p2pos = p2invert ? p2pos_ax : ~p2pos_ax; // X / X-Inv
-    3'd2:    p2pos = p2invert ? p2pos_ay : ~p2pos_ay; // Y / Y-Inv
-    3'd3:    p2pos = p2invert ? paddle_1 : ~paddle_1; // Paddle / Paddle-Inv
-    3'd4:    p2pos = pos_sp[7:0];                     // Spinner / Spinner-Inv
+    3'd0:    p2pos = pos_d[7:0];                           // Digital
+    3'd1:    p2pos = p2invert_eff ? p2pos_ax : ~p2pos_ax; // X / X-Inv
+    3'd2:    p2pos = p2invert_eff ? p2pos_ay : ~p2pos_ay; // Y / Y-Inv
+    3'd3:    p2pos = p2invert_eff ? paddle_1 : ~paddle_1; // Paddle / Paddle-Inv
+    3'd4:    p2pos = pos_sp[7:0];                          // Spinner / Spinner-Inv
     default: p2pos = 8'd128;
   endcase
 end
@@ -587,6 +594,7 @@ wire PLAYER2;
 breakout_top breakout_top(
   .CLK_DRV(clk_sys), .CLK_SRC,
   .RESET(reset),
+  .FLIP_SCREEN(flip_screen),  
   .S1, .S2, .S3, .S4,
   .P1_SERVE_N, .P2_SERVE_N,
   .P1_START_N, .P2_START_N,

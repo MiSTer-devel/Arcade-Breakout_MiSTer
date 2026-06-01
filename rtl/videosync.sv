@@ -5,6 +5,7 @@ module videosync(
   input   logic CLK_DRV, CLOCK,
   input   logic PAD_N, BALL_DISPLAY,
   input   logic PLAYER2_CONDITIONAL,
+  input   logic FLIP_SCREEN,
   output  logic _1H, _2H, _4H, _8H, _16H, _32H, _64H, _128H,
   output  logic _2V, _4V, _8V, _16V, _32V, _64V, _128V,
   output  logic _8H_N, _16H_N, _32H_N, _16V_N, _64V_N, _64V1,
