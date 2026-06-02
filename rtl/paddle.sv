@@ -4,6 +4,7 @@
 module paddle(
   input  logic CLK_DRV,
   input  logic S2,
+  input  logic FLIP_SCREEN,
   input  logic _4H, _8H, _16H, _32H, _64H, _128H,
   input  logic _8V__, _16V__, _32V__, _64V__, _128V__,
   input  logic VSYNC_N,
@@ -73,7 +74,7 @@ module paddle(
   // Player2 conditional
   //
   logic H7c, PLAYER2_CONDITIONAL_;
-  assign H7c = PLAYER2 & S2;
+  assign H7c = (PLAYER2 & S2) ^ FLIP_SCREEN;
   assign PLAYER2_CONDITIONAL_ = H7cq;
 
   // break combinational logic
